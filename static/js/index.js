@@ -13,6 +13,7 @@ document.addEventListener("drop", function (event) {
 	event.stopPropagation();
 	event.preventDefault();
 	filesObj = event.dataTransfer.files;
+	$('#fileNames span').eq(0).text(filesObj[0].name).end().eq(1).text(filesObj[1].name);
 }, false);
 
 document.addEventListener("dragover", function (event) {
@@ -28,9 +29,17 @@ $('body').on("click", "#button", function () {
 		getFilesPath(filesObj);
 	} else {
 		alert("请先导入文件");
+		$('#fileNames span').eq(0).text("").end().eq(1).text("");
 		return;
 	}
 });
+
+var reset = function () {
+	filesObj = null;
+	$('#mask').fadeOut();
+	$('#button').val("开始处理").removeAttr("disabled");
+	$('#fileNames span').text("");
+}
 
 var getFilesPath = function (files) {
 	var length = files.length,
@@ -39,8 +48,7 @@ var getFilesPath = function (files) {
 		i = 0;
 	if (!files || length <= 1 || length > 2) {
 		alert("请同时导入两个文件!");
-		$('#mask').fadeOut();
-		$('#button').val("开始处理").removeAttr("disabled");
+		reset();
 		return;
 	}
 	for (i = 0; i < length; i++) {
@@ -58,15 +66,14 @@ var getFilesPath = function (files) {
 		dealWithExcel(files);
 	} else {
 		alert("文件添加错误!");
-		$('#mask').fadeOut();
-		$('#button').val("开始处理").removeAttr("disabled");
+		reset();
 		return;
 	}
 }
 
 var dealWithExcel = function (files) {
 	if (xlsx === null) {
-		$('#mask').fadeOut();
+		reset();
 		return;
 	}
 
@@ -102,9 +109,14 @@ var dealWithWorksheet = function () {
 		worksheetBook = workbookBook.Sheets[sheetBookNameList[0]],
 		worksheetTel = workbookTel.Sheets[sheetTelNameList[0]],
 		jsonBook = xlsx.utils.sheet_to_json(worksheetBook),
-		jsonTel = xlsx.utils.sheet_to_json(worksheetTel);
-		
-	var targetName = "签约手机号/鉴权工具手机号";
+		jsonTel = xlsx.utils.sheet_to_json(worksheetTel),
+		targetName = "";
+
+	for (attribute in jsonTel[0]) {
+		if (attribute !== "__rowNum__") {
+			targetName = attribute;
+		}
+	}
 	var bookLength = jsonBook.length,
 		telLength = jsonTel.length,
 		targrtTel = "",
@@ -140,9 +152,7 @@ var dealWithWorksheet = function () {
 var writeWorkbook = function () {
 	var buffer = nodeXlsx.build([{name: "output", data: outputArr}]); // returns a buffer 
 	fs.writeFileSync(filePath, buffer, 'binary');
-	$('#mask').fadeOut();
-	$('#button').val("开始处理").removeAttr("disabled");
-	filesObj = null;
+	reset();
 	setTimeout(function () {
 		alert("处理完毕,文件已成功导出!");
 	}, 500);
