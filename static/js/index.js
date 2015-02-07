@@ -1,15 +1,12 @@
 var $ = require('./assets/js/jquery.min.js');
 var fs = require('fs');
-var xlsx = null, curfile = null, workbookBook = null, workbookTel = null, nodeXlsx = null, filesObj = null;
+var xlsx = require('xlsx');
+var nodeXlsx = require('node-xlsx');
+var curfile = null, workbookBook = null, workbookTel = null, filesObj = null;
 //输出文件数组
 var outputArr = [], titles = [];
 //目标文件存储路径
 var filePath = __dirname + '/output.xlsx';
-
-if(typeof require !== 'undefined') {
-	xlsx = require('xlsx');
-	nodeXlsx = require('node-xlsx');
-}
 
 document.addEventListener("drop", function (event) {
 	//阻止默认行为
@@ -40,7 +37,7 @@ var getFilesPath = function (files) {
 		pathObj = {},
 		fileName = "",
 		i = 0;
-	if (!files || length < 1 || length > 2) {
+	if (!files || length <= 1 || length > 2) {
 		alert("请同时导入两个文件!");
 		$('#mask').fadeOut();
 		$('#button').val("开始处理").removeAttr("disabled");
@@ -89,10 +86,10 @@ var dealWithExcel = function (files) {
 		if (queue.length > 0) {
 			curfile = queue.shift();
 			reader.readAsBinaryString(curfile);
-		}
-		
-		if (workbookBook !== null && workbookTel !== null) {
-			dealWithWorksheet();
+		} else {
+			if (workbookBook !== null && workbookTel !== null) {
+				dealWithWorksheet();
+			}
 		}
 	}
 	curfile = queue.shift();
@@ -145,6 +142,7 @@ var writeWorkbook = function () {
 	fs.writeFileSync(filePath, buffer, 'binary');
 	$('#mask').fadeOut();
 	$('#button').val("开始处理").removeAttr("disabled");
+	filesObj = null;
 	setTimeout(function () {
 		alert("处理完毕,文件已成功导出!");
 	}, 500);
