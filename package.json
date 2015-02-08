@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "main": "main.js",
   "dependencies": {
-    "node-xlsx": "^0.5.1"
+    "node-xlsx": "^0.5.1",
+    "xlsx": "^0.7.12"
   }
 }

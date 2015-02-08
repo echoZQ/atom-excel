@@ -6,13 +6,14 @@ var curfile = null, workbookBook = null, workbookTel = null, filesObj = null;
 //输出文件数组
 var outputArr = [], titles = [];
 //目标文件存储路径
-var filePath = __dirname + '/output.xlsx';
+var filePath = "";
 
 document.addEventListener("drop", function (event) {
 	//阻止默认行为
 	event.stopPropagation();
 	event.preventDefault();
 	filesObj = event.dataTransfer.files;
+	filePath = filesObj[0].path.replace(filesObj[0].name, "output.xlsx");
 	$('#fileNames span').eq(0).text(filesObj[0].name).end().eq(1).text(filesObj[1].name);
 }, false);
 
